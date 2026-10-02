@@ -1,8 +1,50 @@
 ---
 title: URL Shortener
-eyebrow: Distributed systems laboratory
+eyebrow: Estudo de um caminho de leitura
 ---
 
 # URL Shortener
 
-Um laboratório onde cada otimização começa como hipótese e termina como experimento mensurável.
+Um encurtador de URLs usado para estudar como um caminho de leitura evolui: primeiro medimos o baseline, depois adicionamos otimizações com hipóteses, fallback e limites documentados.
+
+## O problema e o contrato
+
+O write path recebe `POST /urls`, valida destino e expiração opcional, gera um identificador e persiste o registro canônico no PostgreSQL. O ID é representado como um código Base62 de sete caracteres. O redirect usa `GET /{code}` e responde `302 Found` com `Location`; códigos ausentes retornam `404` e URLs expiradas retornam `410`.
+
+A API separa `healthz` da readiness do armazenamento e mantém handlers independentes das implementações de persistência e cache por meio de portas e adaptadores.
+
+## Caminho de escrita e geração de IDs
+
+PostgreSQL sequence é o gerador de referência. O laboratório compara sequence, Redis `INCR`, range allocation e um gerador Snowflake-like para tornar explícitos coordenação, alocação de ranges, monotonicidade, clock drift e comportamento em falha. Essas alternativas não alteram o contrato HTTP padrão.
+
+## Redirect, cache e proteção do read path
+
+PostgreSQL continua sendo a fonte durável. Cache Aside consulta Redis antes do banco, popula o cache em miss e falha aberta para PostgreSQL quando Redis está indisponível. O cache em camadas adiciona L1 em memória, L2 Redis, cache negativo, TTL jitter e agrupamento de requisições. SWR e detecção de hot keys são componentes experimentais desligados por padrão. Um Bloom filter local pode rejeitar consultas de códigos certamente ausentes; falsos positivos são possíveis e misses continuam corretos.
+
+## Evidência local
+
+No experimento EXP-0004, um workload hot-key de 1.000 requests medidas, concorrência 20 e aquecimento de 50 requests foi executado com cache ligado e desligado. Neste ambiente, Cache Aside mudou throughput observado de 10.582,12 para 12.229,77 req/s (+15,6%), reduziu consultas PostgreSQL de 1.050 para 5 e registrou hit ratio de 99,52% (as contagens incluem o aquecimento). É um resultado de uma máquina local, sem valor de SLO ou previsão de produção.
+
+## Modelos de sistemas distribuídos
+
+Um simulador determinístico em Go compara módulo e consistent hashing, entrada e saída de shards, versões de réplicas, quorum, read repair, rate limiting e roteamento regional entre sa-east, us-east e eu-west. Com 100 mil chaves e entrada de um quarto nó, o módulo remapeou 74,989% das chaves; o anel com 100 nós virtuais remapeou 15,29%, mas ainda teve desequilíbrio de distribuição. Latências de quorum e regiões usam valores controlados pelo modelo, não rede real.
+
+O controle de tráfego compara fixed window, sliding window, leaky bucket e token bucket. Há um token bucket Redis com Lua, limite de concorrência sem fila e load shedding observável; esses componentes permanecem opt-in e desligados por padrão.
+
+## Resiliência e observabilidade
+
+Os cenários locais cobrem Redis indisponível, PostgreSQL lento, picos de concorrência, hot key, expiração, réplica stale e writer regional indisponível. Métricas HTTP, cache, banco, goroutines, memória e pool ajudam a relacionar comportamento e custo. A matriz está documentada no experimento EXP-0014. Simulações verificam invariantes e caminhos de recuperação; não constituem chaos test distribuído nem benchmark multi-host.
+
+## Kubernetes no laboratório local
+
+O estudo documenta um chart Helm para Deployment e Service ClusterIP da API, além de ConfigMap, Secret, probes, requests/limits e controles de segurança. O cenário usa Kubernetes do Docker Desktop com uma réplica; PostgreSQL, Redis e MiniStack permanecem fora do cluster como dependências locais. Os manifests não estão presentes neste checkout do portfólio.
+
+## Arquitetura final proposta
+
+Para produção, a evolução proposta usa Route 53, CloudFront, AWS WAF e Application Load Balancer na borda; a API roda no Amazon EKS em múltiplas zonas, com Deployment, Service, HPA, PDB, IRSA, imagens no ECR e segredos do AWS Secrets Manager. O HPA manteria pelo menos duas réplicas e escalaria por CPU e taxa de requisições; o PDB preservaria uma réplica durante manutenções. PostgreSQL ficaria no Amazon RDS Multi-AZ, com writer e standby síncrono para failover. Read replicas assíncronas serviriam analytics ou leituras que aceitam lag, sem substituir o writer. Redis ficaria no ElastiCache como replication group. Um OpenTelemetry Collector encaminharia os sinais para CloudWatch, Amazon Managed Prometheus e Amazon Managed Grafana. Esse é um desenho de referência, não infraestrutura já provisionada.
+
+## Limites e próximos aprendizados
+
+Sharding, quorum e geo-distribution são modelos in-process; a aplicação ainda usa uma tabela PostgreSQL única. O cluster Kubernetes local tem um node e não prova HA, autoscaling, balanceamento externo ou IAM de workload. O laboratório não utiliza AWS real, RDS, ElastiCache, CDN ou observabilidade gerenciada. Comparações servem para entender trade-offs e formular perguntas de produção, não para afirmar capacidade de produção.
+
+[Código-fonte e documentação técnica](https://github.com/saulo-duarte/url-shortener).

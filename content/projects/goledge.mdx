@@ -1,8 +1,43 @@
 ---
-title: Goledge
-eyebrow: Distributed wallet ledger
+title: GoLedger
+eyebrow: Ledger financeiro distribuído
 ---
 
-# Goledge
+# GoLedger
 
-Um laboratório de sistemas financeiros: fatos imutáveis, workflows assíncronos e consistência explícita.
+Um ledger financeiro em Go que demonstra partidas dobradas, idempotência e workflows de pagamento resilientes a falhas parciais.
+
+## A lógica do ledger
+
+O ledger é o registro contábil autoritativo: cada operação confirmada grava lançamentos imutáveis e balanceados, em unidades menores inteiras (centavos), dentro de uma transação PostgreSQL. O saldo não é alterado à mão; ele decorre desses lançamentos. Uma chave de idempotência impede que uma repetição da mesma requisição duplique a operação.
+
+- **Depósito:** registra partidas opostas entre a conta de liquidação e a carteira. O valor passa a compor o saldo contábil da carteira.
+- **Saque:** consulta o saldo disponível, considerando reservas ativas. Se houver fundos suficientes, registra as partidas opostas entre carteira e liquidação; caso contrário, rejeita sem lançar a operação.
+- **Transferência:** valida as duas carteiras e registra débito na origem e crédito no destino como uma operação balanceada. Não cria nem destrói valor no ledger.
+- **Hold:** reserva temporariamente parte do saldo disponível durante uma operação externa. A reserva não é um lançamento contábil: no sucesso, a captura grava o movimento definitivo; em recusa segura, liberação ou expiração, o valor volta a ficar disponível.
+
+PostgreSQL permanece como fonte autoritativa. O saldo projetado no DynamoDB acelera consultas, enquanto leituras fortes e fallback podem consultar PostgreSQL.
+
+## Quando o gateway falha
+
+O sistema distingue uma falha antes do envio de um resultado incerto. Assim, não tenta cobrar por dois provedores quando o primeiro talvez já tenha aceitado o pagamento.
+
+1. O checkout grava hold, tentativa e evento de outbox na mesma transação PostgreSQL; a API responde 202 Accepted e fornece um identificador consultável.
+2. O worker persiste o provedor escolhido e uma chave de idempotência estável antes de enviar a cobrança.
+3. Se o circuito estiver aberto ou a solicitação não tiver sido enviada, a tentativa pode seguir para o gateway standby com segurança.
+4. Se houver timeout após o envio, o estado passa a `gateway_unknown`. O worker consulta o mesmo provedor com a mesma chave e agenda novas tentativas; não aciona o standby enquanto o resultado continuar incerto.
+5. Sucesso confirmado captura o hold e grava os lançamentos de forma idempotente. Recusa definitiva libera o hold. Se a reconciliação não alcançar um resultado seguro, o pagamento vai para `requires_review` e o hold permanece reservado para evitar que fundos possivelmente cobrados voltem a ficar disponíveis.
+
+`GET /payments/{paymentID}` permite acompanhar `pending`, `processing`, `gateway_unknown`, `retry_scheduled`, `completed`, `failed` e `requires_review`.
+
+## Kubernetes e operação local
+
+O projeto empacota o API em um Deployment Kubernetes exposto por Service, com probes de readiness e liveness, limites/configurações de recursos e controles de segurança do container. O chart Helm inclui configuração de réplicas e recursos opcionais de HPA e PodDisruptionBudget. Para o cluster local, a imagem construída é carregada no runtime do Kubernetes e usa `imagePullPolicy: Never`, evitando depender de um registry nessa demonstração. Os manifests também cobrem dependências e observabilidade locais.
+
+Isso documenta e exercita o deploy em Kubernetes local; não representa uma implantação em cluster cloud de produção.
+
+## Limites da demonstração
+
+Os adapters de antifraude e pagamento são mocks locais. O projeto demonstra orquestração, idempotência, failover seguro e reconciliação; não se conecta a adquirentes, bancos ou uma rede de pagamentos real.
+
+[Implementação e documentação técnica](https://github.com/saulo-duarte/distributed-wallet-ledger).

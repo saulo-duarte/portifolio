@@ -7,7 +7,10 @@ import { TbDatabase } from "react-icons/tb";
 
 export function CapTheoremSection({ locale }: { locale: Locale }) {
   return (
-    <section id="cap-theorem" className="scroll-mt-28">
+    <section
+      id="cap-theorem"
+      className="scroll-mt-28 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-14 sm:py-20 bg-slate-100/80 border-y border-slate-300"
+    >
       {/* Section Header */}
       <div className="mb-10">
         <span className="text-sm font-medium text-slate-500 block mb-1.5">
@@ -26,7 +29,7 @@ export function CapTheoremSection({ locale }: { locale: Locale }) {
       </div>
 
       {/* Cross Confrontation Layout with Central VS Pill */}
-      <div className="relative border-y border-slate-300 py-8">
+      <div className="relative py-6">
         {/* Floating Center VS Badge on Desktop */}
         <div className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
           <span className="w-10 h-10 rounded-full bg-slate-950 border-2 border-white text-white font-mono text-xs font-black grid place-items-center shadow-md">

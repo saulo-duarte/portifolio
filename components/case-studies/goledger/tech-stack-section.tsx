@@ -1,146 +1,249 @@
 "use client";
 
-import { FiDatabase, FiLayers } from "react-icons/fi";
-import { SiOpentelemetry, SiPostgresql } from "react-icons/si";
-import { TbBrandAws, TbBrandGolang } from "react-icons/tb";
+import { SiJaeger, SiPostgresql, SiTerraform } from "react-icons/si";
+import { TbBrandAws, TbBrandGolang, TbDatabase } from "react-icons/tb";
 import type { Locale } from "@/components/portfolio";
 
 export function TechStackSection({ locale }: { locale: Locale }) {
+  const pt = locale === "pt";
+
   return (
     <section id="tech-stack" className="scroll-mt-28">
+      {/* Header */}
       <div className="mb-10">
         <span className="text-sm font-medium text-slate-500 block mb-1.5">
-          05 · {locale === "pt" ? "Stack Tecnológico" : "Tech Stack"}
+          05 · {pt ? "Stack Tecnológico" : "Tech Stack"}
         </span>
         <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-950">
-          {locale === "pt"
-            ? "Tecnologias com papéis arquiteturais explícitos"
-            : "Technologies with explicit architectural roles"}
+          {pt ? "A escolha da stack" : "The stack choice"}
         </h2>
         <p className="mt-2.5 text-sm sm:text-base text-slate-600 max-w-3xl leading-relaxed">
-          {locale === "pt"
-            ? "A stack foi organizada por responsabilidade arquitetural: domínio e orquestração permanecem independentes, enquanto persistência, mensageria, projeções e observabilidade são tratadas por adapters especializados."
-            : "The stack is organized by architectural responsibility: domain and orchestration remain independent, while persistence, messaging, projections, and observability are handled by specialized adapters."}
+          {pt
+            ? "Cada tecnologia foi escolhida por justificativas concretas de engenharia: eficiência sob alta concorrência, garantias transacionais estritas, infraestrutura reproduzível e rastreabilidade distribuída."
+            : "Every technology was selected based on concrete engineering criteria: efficiency under high concurrency, strict transactional guarantees, reproducible infrastructure, and distributed traceability."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {/* Go */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 grid place-items-center text-xl flex-shrink-0">
-                <TbBrandGolang />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">Go (net/http + chi)</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/ledger/domain & app</span>
-              </div>
+      {/* 3x2 Open Layout with Continuous Cross Separator */}
+      <div className="grid grid-cols-1 md:grid-cols-2 pt-2">
+        {/* Item 1: Top-Left - Go */}
+        <div className="pb-10 md:pb-12 md:pr-12 border-b border-slate-300 md:border-r space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 grid place-items-center text-lg shrink-0">
+              <TbBrandGolang />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Implementa o domínio contábil, invariantes matemáticas e a camada de aplicação/orquestração (Sagas). Mantém a infraestrutura e integrações externas desacopladas atrás de adapters e interfaces estritas."
-                : "Implements core accounting domain, mathematical invariants, and application orchestration (Sagas). Keeps infrastructure and external integrations decoupled behind strict adapters and interfaces."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                01
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                Go (net/http + chi)
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "Linguagem compilada de tipagem estática que gera binários enxutos empacotados em contêineres distroless de apenas ~18MB. Seu modelo de concorrência com goroutines (~2KB de stack inicial) e channels processa milhares de conexões simultâneas com uso mínimo de memória, enquanto a biblioteca padrão madura (net/http, context, sync) dispensa frameworks pesados."
+              : "Compiled statically-typed language producing lightweight ~18MB distroless containers. Native concurrency via lightweight goroutines (~2KB stack) and channels handles thousands of concurrent requests with low memory footprint, while a mature standard library (net/http, context, sync) avoids bulky frameworks."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Alta vazão com latência determinística. O Garbage Collector moderno do Go foca em pausas sub-milissegundo (&lt;1ms) e a linguagem favorece alocação em stack via <em>escape analysis</em>, reduzindo drasticamente a pressão no heap durante transferências financeiras críticas.</>
+              ) : (
+                <>High throughput with deterministic latencies. Go's modern GC achieves sub-millisecond pauses (&lt;1ms) while value types and escape analysis keep memory allocations on the stack, minimizing heap pressure during high-throughput financial workflows.</>
+              )}
             </p>
           </div>
         </div>
 
-        {/* PostgreSQL */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 grid place-items-center text-xl flex-shrink-0">
-                <SiPostgresql />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">PostgreSQL (pgx + SQLC)</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/ledger/adapters/postgres</span>
-              </div>
+        {/* Item 2: Top-Right - PostgreSQL */}
+        <div className="pt-10 md:pt-0 pb-10 md:pb-12 md:pl-12 border-b border-slate-300 space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 grid place-items-center text-lg shrink-0">
+              <SiPostgresql />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Fonte autoritativa do estado financeiro e fronteira transacional única do ledger contábil. Centraliza partidas dobradas, reservas temporárias (holds), idempotência e a tabela de Transactional Outbox em transações ACID."
-                : "Authoritative financial source of truth and transactional boundary for ledger postings, holds, idempotency, and the Transactional Outbox table within ACID transactions."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                02
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                PostgreSQL (pgx + SQLC)
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "A modelagem relacional do PostgreSQL é imbatível para o domínio financeiro: permite constraints de integridade referencial rígidas (FKs), check constraints para garantir saldos não negativos, índices parciais para idempotência e tipos monetários exatos. O driver pgx com SQLC compila SQL puro em código Go tipado, eliminando a lentidão e imprevisibilidade de ORMs."
+              : "PostgreSQL's relational modeling is unmatched for financial ledgers: strict foreign keys, check constraints preventing negative balance states, partial indexes for idempotency, and exact monetary types. The pgx driver and SQLC compile pure SQL into type-safe Go code, eliminating the overhead and unpredictability of ORMs."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Conformidade ACID estrita com locks pessimistas (<code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">SELECT FOR UPDATE</code>) e gravação atômica na tabela <code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">outbox_events</code> dentro da mesma transação, garantindo consistência sem distributed transactions.</>
+              ) : (
+                <>Strict ACID compliance with row-level locks (<code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">SELECT FOR UPDATE</code>) and atomic writes to <code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">outbox_events</code> in the same transaction, ensuring consistency without distributed transactions.</>
+              )}
             </p>
           </div>
         </div>
 
-        {/* AWS SNS */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 grid place-items-center text-xl flex-shrink-0">
-                <TbBrandAws />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">AWS SNS (Fanout)</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/ledger/adapters/sns</span>
-              </div>
+        {/* Item 3: Middle-Left - AWS SNS + SQS */}
+        <div className="pt-10 md:pt-12 pb-10 md:pb-12 md:pr-12 border-b border-slate-300 md:border-r space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 grid place-items-center text-lg shrink-0">
+              <TbBrandAws />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Responsável por fanout e desacoplamento assíncrono. Distribui eventos de domínio contábeis para múltiplos consumidores independentes sem acoplamento direto ou concorrência com o caminho de escrita."
-                : "Handles asynchronous fanout and pub/sub decoupling. Distributes domain events to multiple independent consumers without direct coupling or write-path contention."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                03
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                AWS SNS + SQS
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "Dupla serverless totalmente gerenciada que fornece mensageria assíncrona desacoplada de altíssima durabilidade (multi-AZ) sem o fardo operacional de configurar, clusterizar e manter corretores Kafka. O SNS faz fanout instantâneo de cada evento contábil para múltiplos tópicos assinantes, enquanto as filas SQS garantem bufferização elástica contra picos de tráfego."
+              : "Fully managed serverless messaging pair delivering multi-AZ durability without the operational burden of provisioning and maintaining Kafka clusters. SNS instantly fans out domain events to multiple decoupled subscribers, while SQS queues buffer traffic spikes elastically."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Isolamento de falhas e resiliência: retentativas automáticas exponenciais com jitter e Dead Letter Queues (DLQ) garantem que falhas temporárias em consumidores secundários nunca travem o write path do ledger financeiro.</>
+              ) : (
+                <>Fault isolation and resilience: automated exponential backoff with jitter and Dead Letter Queues (DLQ) ensure downstream consumer disruptions never block the primary ledger write path.</>
+              )}
             </p>
           </div>
         </div>
 
-        {/* AWS SQS */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 grid place-items-center text-xl flex-shrink-0">
-                <FiLayers />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">AWS SQS (+ DLQ)</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/ledger/adapters/sqs</span>
-              </div>
+        {/* Item 4: Middle-Right - DynamoDB */}
+        <div className="pt-10 md:pt-12 pb-10 md:pb-12 md:pl-12 border-b border-slate-300 space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 grid place-items-center text-lg shrink-0">
+              <TbDatabase />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Buffer de vazão e isolamento de consumidores. Oferece retries exponenciais e segregação automática de mensagens venenosas na Dead Letter Queue, impedindo que falhas em projeções travem o processamento contábil."
-                : "Provides buffering and consumer isolation. Enables exponential retries and automatic poison message quarantine in Dead Letter Queues, protecting the core flow from downstream failure."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                04
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                Amazon DynamoDB
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "Banco NoSQL chave-valor desenhado para responder com latência previsível de sub-milissegundo em leituras de chave primária, independentemente de ter 1 milhão ou 1 bilhão de registros. Sua escalabilidade horizontal automática particionada por hash e capacidade on-demand dispensam dimensionamento manual de instâncias."
+              : "NoSQL key-value database engineered for predictable sub-millisecond primary key lookups, whether storing 1 million or 1 billion records. Its hash-partitioned horizontal scalability and on-demand capacity eliminate manual cluster provisioning and sizing."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Desacoplamento absoluto de leitura (CQRS): milhões de consultas de saldo e extrato são atendidas pelo DynamoDB via escritas condicionais versionadas (<code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">version + 1</code>), sem consumir pool de conexões nem IOPS do PostgreSQL contábil.</>
+              ) : (
+                <>Complete read decoupling (CQRS): millions of balance and statement queries are served with single-digit millisecond latency via versioned conditional writes (<code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">version + 1</code>), shielding PostgreSQL from read saturation.</>
+              )}
             </p>
           </div>
         </div>
 
-        {/* DynamoDB */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 grid place-items-center text-xl flex-shrink-0">
-                <FiDatabase />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">DynamoDB (CQRS)</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/ledger/adapters/dynamo</span>
-              </div>
+        {/* Item 5: Bottom-Left - Terraform */}
+        <div className="pt-10 md:pt-12 pb-10 md:pb-0 md:pr-12 border-b md:border-b-0 md:border-r border-slate-300 space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 grid place-items-center text-lg shrink-0">
+              <SiTerraform />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Read model do CQRS para consultas frequentes de saldo e histórico. Projeta visões desnormalizadas com escrita condicional e versionamento monotônico, escalando leituras sem onerar o banco transacional."
-                : "CQRS read model for high-concurrency balance and statement lookups. Projects denormalized views with conditional versioning, scaling reads independently from the transactional ledger."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                05
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                Terraform (IaC)
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "Toda a infraestrutura de nuvem é declarada como código de forma reprodutível, versionável e imutável. Módulos dedicados provisionam filas SQS, tópicos SNS, tabelas DynamoDB, políticas IAM com privilégio mínimo e recursos de rede sem intervenção manual no console da AWS."
+              : "Entire cloud infrastructure is declared as reproducible, version-controlled, immutable code. Dedicated modules provision SQS queues, SNS topics, DynamoDB tables, least-privilege IAM policies, and VPC networking without manual AWS console interventions."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Confiabilidade de provisionamento: previne drift de configuração entre ambientes (staging/produção), viabiliza auditoria de infraestrutura via Git e permite recriar o ambiente financeiro inteiro de forma determinística em minutos.</>
+              ) : (
+                <>Provisioning predictability: prevents configuration drift across staging and production environments, enables infrastructure GitOps auditability, and provisions complete environments deterministically in minutes.</>
+              )}
             </p>
           </div>
         </div>
 
-        {/* OpenTelemetry */}
-        <div className="rounded-2xl border border-slate-300 bg-slate-50/40 p-6 hover:border-slate-400 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 grid place-items-center text-xl flex-shrink-0">
-                <SiOpentelemetry />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-base font-bold text-slate-950">OpenTelemetry + slog</h4>
-                <span className="text-[11px] font-mono text-slate-500 block truncate">internal/platform/observability</span>
-              </div>
+        {/* Item 6: Bottom-Right - Jaeger */}
+        <div className="pt-10 md:pt-12 md:pl-12 space-y-3.5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 grid place-items-center text-lg shrink-0">
+              <SiJaeger />
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {locale === "pt"
-                ? "Correlação contextual ponta a ponta. Propaga trace context através da requisição HTTP, orquestração de Saga, relay do Outbox e consumidores SQS assíncronos com structured logging em Go."
-                : "End-to-end distributed context correlation. Injects and propagates trace contexts across HTTP requests, Saga orchestration, Outbox relay, and async SQS consumers with Go structured logging."}
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight select-none">
+                06
+              </span>
+              <span className="text-slate-400 font-bold select-none">—</span>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight">
+                Jaeger (Distributed Tracing)
+              </h3>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {pt
+              ? "Plataforma de tracing distribuído padrão CNCF integrada via OpenTelemetry SDK em Go. Permite rastrear o caminho completo de cada centavo em tempo real: desde o handshake HTTP na API, passando pelos locks e queries do PostgreSQL, até a entrega nas filas SQS e gravação no DynamoDB."
+              : "CNCF-standard distributed tracing platform integrated via OpenTelemetry Go SDK. Tracks the end-to-end journey of each transactional call in real time: from HTTP ingress API handshakes, through PostgreSQL row-locks and queries, to asynchronous SQS dispatch and DynamoDB projection writes."}
+          </p>
+
+          <div className="border-l-3 border-sky-500 bg-sky-50/60 rounded-r-xl p-3.5 mt-2.5 shadow-2xs">
+            <span className="text-xs font-bold text-sky-950 block mb-1">
+              {pt ? "Por que foi escolhido" : "Why it was chosen"}
+            </span>
+            <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+              {pt ? (
+                <>Visibilidade ponta a ponta e depuração de latência: correlaciona <code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">trace_id</code> entre fronteiras assíncronas, identificando gargalos em milissegundos e eliminando pontos cegos em orquestrações complexas.</>
+              ) : (
+                <>End-to-end visibility and latency profiling: correlates <code className="font-mono text-xs text-sky-950 bg-sky-100/80 px-1 py-0.5 rounded border border-sky-200/60">trace_id</code> across asynchronous boundaries, surfacing microsecond bottlenecks and eliminating blind spots in complex orchestrations.</>
+              )}
             </p>
           </div>
         </div>

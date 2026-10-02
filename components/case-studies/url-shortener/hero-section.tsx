@@ -3,24 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiActivity, FiDatabase, FiLayers, FiShield } from "react-icons/fi";
-import { SiKubernetes, SiOpentelemetry, SiPostgresql, SiTerraform } from "react-icons/si";
-import { TbBrandAws, TbBrandGolang, TbGitBranch } from "react-icons/tb";
 import { FaGithub } from "react-icons/fa6";
-import { GOLEDGER_REPO_URL } from "./types";
+import { FiActivity, FiDatabase, FiLayers, FiShield } from "react-icons/fi";
+import { SiKubernetes, SiOpentelemetry, SiPostgresql, SiRedis } from "react-icons/si";
+import { TbBrandGolang, TbGitBranch, TbRoute2 } from "react-icons/tb";
 import type { Locale } from "@/components/portfolio";
+import { MetricCard } from "./shared";
 
-import { navTabs } from "./nav-tabs";
+const URL_SHORTENER_REPO_URL = "https://github.com/saulo-duarte/url-shortener";
 
-export function HeroSection({ locale }: { locale: Locale }) {
-  const root = locale === "pt" ? "/pt" : "/en";
+export function ShortenerHero({ locale }: { locale: Locale }) {
+  const pt = locale === "pt";
+  const root = pt ? "/pt" : "/en";
 
   return (
     <section id="overview" className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
-      {/* 2-Column Main Hero with matching heights */}
+      {/* 2-Column Main Hero */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch mb-8 sm:mb-10">
         {/* Left Column: Information & Actions */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -33,36 +34,39 @@ export function HeroSection({ locale }: { locale: Locale }) {
                 href={root}
               >
                 <span>←</span>
-                <span>{locale === "pt" ? "Todos os projetos" : "All projects"}</span>
+                <span>{pt ? "Todos os projetos" : "All projects"}</span>
               </Link>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">
-              GoLedger
+              URL Shortener
             </h1>
           </div>
 
           <p className="text-base sm:text-lg font-semibold text-slate-900 tracking-tight leading-snug">
-            {locale === "pt"
-              ? "Ledger financeiro distribuído com consistência, idempotência e processamento orientado a eventos"
-              : "Distributed financial ledger with consistency, idempotency and event-driven processing"}
+            {pt
+              ? "Um encurtador de URLs para estudar a evolução de um caminho de leitura"
+              : "A URL shortener used to study how a read path evolves"}
           </p>
 
           <p className="text-sm sm:text-[14.5px] text-slate-600 leading-relaxed">
-            {locale === "pt" ? (
+            {pt ? (
               <>
-                Engine financeira em <strong className="text-sky-700 font-semibold">Go</strong> com{" "}
-                <strong className="text-sky-700 font-semibold">lançamentos contábeis balanceados e imutáveis</strong>, garantia estrita de{" "}
-                <strong className="text-sky-700 font-semibold">idempotência</strong> e mensageria orientada a eventos. A{" "}
-                <strong className="text-sky-700 font-semibold">Saga persistida</strong> reconcilia transações em
-                cenários de falha parcial de gateway, garantindo <strong className="text-sky-700 font-semibold">reservas seguras (holds)</strong> e integridade transacional ACID.
+                Serviço em <strong className="text-sky-700 font-semibold">Go</strong>, com{" "}
+                <strong className="text-sky-700 font-semibold">PostgreSQL</strong> como fonte durável e{" "}
+                <strong className="text-sky-700 font-semibold">Redis</strong> como camada de cache. O laboratório mede
+                mudanças no caminho de leitura com <strong className="text-sky-700 font-semibold">Cache Aside</strong> e{" "}
+                <strong className="text-sky-700 font-semibold">Bloom filter</strong>, além de usar simuladores locais para
+                estudar <strong className="text-sky-700 font-semibold">sharding e quorum</strong>.
               </>
             ) : (
               <>
-                Double-entry financial engine built in <strong className="text-sky-700 font-semibold">Go</strong> with{" "}
-                <strong className="text-sky-700 font-semibold">immutable balanced postings</strong>, strict{" "}
-                <strong className="text-sky-700 font-semibold">idempotency keys</strong>, and asynchronous event streams. Its{" "}
-                <strong className="text-sky-700 font-semibold">persisted Saga</strong> coordinates uncertain gateway outcomes, ensuring <strong className="text-sky-700 font-semibold">safe temporary holds</strong> and ACID financial correctness under high concurrency.
+                A service in <strong className="text-sky-700 font-semibold">Go</strong>, with{" "}
+                <strong className="text-sky-700 font-semibold">PostgreSQL</strong> as the durable source and{" "}
+                <strong className="text-sky-700 font-semibold">Redis</strong> as a cache layer. The lab measures
+                read-path changes with <strong className="text-sky-700 font-semibold">Cache Aside</strong> and{" "}
+                <strong className="text-sky-700 font-semibold">Bloom filters</strong>, and uses local simulators to study{" "}
+                <strong className="text-sky-700 font-semibold">sharding and quorum</strong>.
               </>
             )}
           </p>
@@ -70,42 +74,46 @@ export function HeroSection({ locale }: { locale: Locale }) {
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <a
-              href="#context"
+              href="#architecture"
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById("context")?.scrollIntoView({ behavior: "smooth" });
+                document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" });
               }}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-sky-600 bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer active:scale-98"
             >
               <TbGitBranch className="text-sm text-white" />
-              <span className="text-white">{locale === "pt" ? "Explorar arquitetura" : "Explore architecture"}</span>
+              <span className="text-white">{pt ? "Explorar arquitetura" : "Explore architecture"}</span>
               <span className="text-white">→</span>
             </a>
 
             <a
-              href={GOLEDGER_REPO_URL}
+              href={URL_SHORTENER_REPO_URL}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-900 text-xs sm:text-sm font-semibold transition-all shadow-2xs"
             >
               <FaGithub className="text-sm text-slate-900" />
-              <span>{locale === "pt" ? "Ver no GitHub" : "View on GitHub"}</span>
+              <span>{pt ? "Ver no GitHub" : "View on GitHub"}</span>
               <span className="text-xs text-slate-400">↗</span>
             </a>
           </div>
         </motion.div>
 
-        {/* Right Column: Editorial Rectangular Architecture Illustration matching left column height */}
-        <motion.div 
+        {/* Right Column: Panoramic Architecture Illustration */}
+        <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
           className="lg:col-span-5 flex justify-center items-stretch"
         >
-          <div className="relative w-full min-h-[280px] lg:min-h-full rounded-2xl overflow-hidden border border-slate-300 bg-slate-950 shadow-xs group">
+          <div className="relative w-full min-h-[280px] lg:min-h-full rounded-2xl overflow-hidden bg-slate-950 shadow-xs group">
             <Image
-              src="/images/goledge-hero.png"
-              alt="GoLedger Gopher and Kubernetes Distributed Systems Architecture"
+              src="/images/url-shortener-cover-cartoon.png"
+              alt={
+                pt
+                  ? "Ilustração cartoon do laboratório de URL Shortener, Redis, Base62 e PostgreSQL"
+                  : "Cartoon illustration of the URL Shortener lab with Redis, Base62, and PostgreSQL"
+              }
               fill
               className="object-cover group-hover:scale-102 transition-transform duration-500"
               sizes="(max-width: 1024px) 100vw, 42vw"
@@ -135,39 +143,23 @@ export function HeroSection({ locale }: { locale: Locale }) {
           {/* PostgreSQL */}
           <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
             <SiPostgresql className="text-base text-sky-700" />
-            <span>PostgreSQL</span>
+            <span>PostgreSQL (SQLC)</span>
           </div>
 
           <span className="text-slate-300 hidden sm:inline">|</span>
 
-          {/* DynamoDB */}
+          {/* Redis */}
           <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
-            <FiDatabase className="text-base text-blue-600" />
-            <span>DynamoDB</span>
+            <SiRedis className="text-base text-red-600" />
+            <span>Redis L1/L2</span>
           </div>
 
           <span className="text-slate-300 hidden sm:inline">|</span>
 
-          {/* Persistent Saga */}
-          <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
-            <TbGitBranch className="text-base text-indigo-600" />
-            <span>Saga Pattern</span>
-          </div>
-
-          <span className="text-slate-300 hidden sm:inline">|</span>
-
-          {/* Circuit Breaker */}
+          {/* Bloom Filter */}
           <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
             <FiShield className="text-base text-emerald-600" />
-            <span>Circuit Breaker</span>
-          </div>
-
-          <span className="text-slate-300 hidden sm:inline">|</span>
-
-          {/* AWS SNS/SQS */}
-          <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
-            <TbBrandAws className="text-lg text-amber-500" />
-            <span>AWS SNS/SQS</span>
+            <span>Bloom Filter</span>
           </div>
 
           <span className="text-slate-300 hidden sm:inline">|</span>
@@ -175,15 +167,7 @@ export function HeroSection({ locale }: { locale: Locale }) {
           {/* Kubernetes */}
           <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
             <SiKubernetes className="text-base text-blue-600" />
-            <span>Kubernetes</span>
-          </div>
-
-          <span className="text-slate-300 hidden sm:inline">|</span>
-
-          {/* Terraform */}
-          <div className="inline-flex items-center gap-2 text-slate-800 text-xs sm:text-sm font-semibold">
-            <SiTerraform className="text-base text-purple-600" />
-            <span>Terraform</span>
+            <span>Kubernetes + Helm</span>
           </div>
 
           <span className="text-slate-300 hidden sm:inline">|</span>

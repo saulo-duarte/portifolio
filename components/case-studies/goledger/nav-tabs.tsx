@@ -3,35 +3,45 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FiActivity, FiBox, FiDatabase, FiHome, FiLayers, FiPlay, FiSliders, FiTarget } from "react-icons/fi";
+import { FiActivity, FiBox, FiDatabase, FiHome, FiLayers, FiPlay, FiServer, FiSliders, FiTarget } from "react-icons/fi";
 import { FaGithub } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/components/portfolio";
 
-interface TabItem {
+export interface TabItem {
   id: string;
+  num: string;
   label: { pt: string; en: string };
   icon: React.ElementType;
 }
 
-const navTabs: TabItem[] = [
-  { id: "overview", label: { pt: "Visão geral", en: "Overview" }, icon: FiHome },
-  { id: "problem", label: { pt: "Desafios", en: "Challenges" }, icon: FiTarget },
-  { id: "architecture", label: { pt: "Arquitetura", en: "Architecture" }, icon: FiLayers },
-  { id: "simulator", label: { pt: "Simulador", en: "Simulator" }, icon: FiPlay },
-  { id: "cap-theorem", label: { pt: "Trade-offs", en: "Trade-offs" }, icon: FiSliders },
-  { id: "tech-stack", label: { pt: "Stack", en: "Stack" }, icon: FiBox },
-  { id: "domain-mdx", label: { pt: "Domínio", en: "Domain" }, icon: FiDatabase },
-  { id: "observability", label: { pt: "Observabilidade", en: "Observability" }, icon: FiActivity },
+export const navTabs: TabItem[] = [
+  { id: "context", num: "01", label: { pt: "Contexto", en: "Context" }, icon: FiHome },
+  { id: "problem", num: "02", label: { pt: "Desafios", en: "Challenges" }, icon: FiTarget },
+  { id: "architecture", num: "03", label: { pt: "Arquitetura", en: "Architecture" }, icon: FiLayers },
+  { id: "cap-theorem", num: "04", label: { pt: "Trade-offs", en: "Trade-offs" }, icon: FiSliders },
+  { id: "tech-stack", num: "05", label: { pt: "Stack", en: "Stack" }, icon: FiBox },
+  { id: "infrastructure", num: "06", label: { pt: "Infraestrutura", en: "Infrastructure" }, icon: FiServer },
+  { id: "observability", num: "07", label: { pt: "Observabilidade", en: "Observability" }, icon: FiActivity },
 ];
 
 export function GoledgerHeader({ locale }: { locale: Locale }) {
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [isScrolledPastHero, setIsScrolledPastHero] = useState<boolean>(false);
   const root = locale === "pt" ? "/pt" : "/en";
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
+      
+      // Check if user scrolled past the hero section (approx 420px)
+      const heroEl = document.getElementById("overview");
+      if (heroEl) {
+        setIsScrolledPastHero(scrollY > heroEl.offsetTop + heroEl.offsetHeight - 120);
+      } else {
+        setIsScrolledPastHero(scrollY > 380);
+      }
+
       const scrollPosition = scrollY + 220;
       for (const tab of [...navTabs].reverse()) {
         const el = document.getElementById(tab.id);
@@ -43,6 +53,7 @@ export function GoledgerHeader({ locale }: { locale: Locale }) {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -93,51 +104,19 @@ export function GoledgerHeader({ locale }: { locale: Locale }) {
           </button>
         </div>
 
-        {/* Center: Case Study Navigation Tabs */}
-        <nav className="flex items-center gap-1 sm:gap-2 flex-1 justify-center overflow-x-auto no-scrollbar py-0.5">
-          {navTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-
-            return (
-              <a
-                key={tab.id}
-                href={`#${tab.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(tab.id);
-                  const target = document.getElementById(tab.id);
-                  if (target) {
-                    target.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-medium transition-all whitespace-nowrap cursor-pointer border-b-2 rounded-none",
-                  isActive
-                    ? "border-sky-600 text-sky-700 font-semibold"
-                    : "border-transparent text-slate-600 hover:text-slate-950 hover:border-slate-300"
-                )}
-              >
-                <Icon className={cn("text-sm flex-shrink-0", isActive ? "text-sky-600" : "text-slate-400")} />
-                <span>{tab.label[locale]}</span>
-              </a>
-            );
-          })}
-        </nav>
-
         {/* Right: GitHub & Language Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <a
             href="https://github.com/saulo-duarte/distributed-wallet-ledger"
             target="_blank"
             rel="noreferrer"
-            className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 shadow-2xs transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 shadow-2xs transition-all"
           >
-            <FaGithub className="text-xs text-slate-800" />
+            <FaGithub className="text-sm text-slate-800" />
             <span>GitHub</span>
           </a>
 
-          <div className="h-4 w-px bg-slate-200 hidden lg:block" />
+          <div className="h-4 w-px bg-slate-200" />
 
           {/* Lang switcher pill with country flags */}
           <div className="inline-flex p-0.5 rounded-full border border-slate-200 bg-slate-100 text-xs font-semibold shadow-2xs">
@@ -170,6 +149,67 @@ export function GoledgerHeader({ locale }: { locale: Locale }) {
 
       </div>
     </header>
+  );
+}
+
+export function GoledgerSidebar({ locale }: { locale: Locale }) {
+  const [activeTab, setActiveTab] = useState<string>("context");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const scrollPosition = scrollY + 220;
+      for (const tab of [...navTabs].reverse()) {
+        const el = document.getElementById(tab.id);
+        if (el && el.offsetTop <= scrollPosition) {
+          setActiveTab(tab.id);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="sticky top-20 space-y-3">
+      <div className="text-sm sm:text-[15px] font-bold text-slate-900 pb-2.5 border-b border-slate-200">
+        <span>{locale === "pt" ? "Índice do projeto" : "Project index"}</span>
+      </div>
+
+      <nav className="flex flex-col space-y-1">
+        {navTabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <a
+              key={tab.id}
+              href={`#${tab.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab(tab.id);
+                const target = document.getElementById(tab.id);
+                if (target) {
+                  target.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all text-left",
+                isActive
+                  ? "bg-sky-50 text-sky-800 font-semibold border-l-2 border-sky-600 rounded-l-none shadow-2xs"
+                  : "text-slate-400 hover:text-slate-700 hover:bg-slate-100/70"
+              )}
+            >
+              <span className={cn("font-mono text-xs font-semibold", isActive ? "text-sky-700" : "text-slate-400")}>
+                {tab.num}
+              </span>
+              <span className="truncate">{tab.label[locale]}</span>
+            </a>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
 

@@ -37,8 +37,8 @@ export const simulationScenarios: readonly SimulationScenario[] = [
     label: { pt: "Recusa no Gateway", en: "Gateway Decline" },
     tag: { pt: "Compensação Saga", en: "Saga Compensation" },
     desc: {
-      pt: "Cartão recusado pelo adquirente externo: compensação automática libera o saldo bloqueado no ledger.",
-      en: "Card declined by external acquirer: automated compensating transaction releases locked ledger balance."
+      pt: "Recusa definitiva no gateway mock: a Saga registra a falha e libera o hold; não tenta outro provedor para uma transação recusada.",
+      en: "Definitive decline from the mock gateway: the Saga records the failure and releases the hold; it does not retry the declined payment through another provider."
     }
   },
   {
@@ -47,18 +47,18 @@ export const simulationScenarios: readonly SimulationScenario[] = [
     label: { pt: "Timeout no Gateway", en: "Gateway Timeout" },
     tag: { pt: "Idempotência & Hold", en: "Idempotency & Hold" },
     desc: {
-      pt: "Timeout transitório de rede: retries com Idempotency-Key evitam duplicidade e transação de compensação destrava o hold.",
-      en: "Transient network timeout: Idempotency-Key retries prevent duplicates and compensating transaction releases hold."
+      pt: "Após o envio, o resultado é incerto: a Saga consulta o mesmo provedor com a mesma chave e mantém o hold durante as tentativas. Sem reconciliação segura, exige revisão.",
+      en: "After submission, the outcome is uncertain: the Saga queries the same provider with the same key and keeps the hold during retries. If it cannot reconcile safely, it requires review."
     }
   },
   {
     id: "circuit_breaker",
     num: "05",
-    label: { pt: "Circuit Breaker", en: "Circuit Breaker" },
-    tag: { pt: "Fail-Fast (0.1ms)", en: "Fail-Fast (0.1ms)" },
+    label: { pt: "Circuito aberto → standby", en: "Open circuit → standby" },
+    tag: { pt: "Failover seguro", en: "Safe failover" },
     desc: {
-      pt: "Isolamento preventivo de PSP degradado, rejeitando chamadas em 0.1ms para blindar goroutines e pools de conexão.",
-      en: "Preventive circuit tripping under downstream failure, failing fast in 0.1ms to guard goroutines and pools."
+      pt: "O circuito aberto impede o envio ao primário; a tentativa persistida pode seguir para o standby porque a cobrança ainda não foi submetida.",
+      en: "An open circuit prevents submission to the primary; the persisted attempt can proceed to standby because the payment was never submitted."
     }
   }
 ] as const;
