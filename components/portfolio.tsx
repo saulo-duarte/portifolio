@@ -19,7 +19,7 @@ import {
 } from "react-icons/si";
 import { FaJava, FaGithub, FaLinkedin, FaAws } from "react-icons/fa6";
 import { TbBrandAws, TbBrandGolang, TbGitBranch, TbRoute2 } from "react-icons/tb";
-import { FiActivity, FiBarChart2, FiBox, FiCheck, FiCloud, FiCode, FiDatabase, FiFileText, FiGitPullRequest, FiLayers, FiPlay, FiRefreshCw, FiShield, FiTrendingUp } from "react-icons/fi";
+import { FiActivity, FiBarChart2, FiBox, FiCheck, FiCloud, FiCode, FiDatabase, FiGitPullRequest, FiLayers, FiPlay, FiRefreshCw, FiShield, FiTrendingUp } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
 import { GoledgerCaseStudy } from "@/components/case-studies/goledger";
@@ -390,16 +390,6 @@ export function HomePage({ locale }: { locale: Locale }) {
 
               <div className="flex flex-wrap items-center gap-3 pt-5 border-t border-slate-100 mt-auto">
                 <a
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-sky-600 bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer active:scale-98"
-                  href="/cv.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FiFileText className="text-sm text-white" />
-                  <span>{c.cv}</span>
-                  <span className="text-xs text-sky-100">↗</span>
-                </a>
-                <a
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-900 text-xs sm:text-sm font-semibold transition-all shadow-2xs"
                   href="https://github.com/saulo-duarte"
                   target="_blank"
@@ -619,4 +609,3 @@ function CaseFrame({ locale, slug, children }: { locale: Locale; slug: Slug; chi
 function ShortenerCaseStudy({ locale }: { locale: Locale }) {
   return <CaseFrame locale={locale} slug="url-shortener"><UrlShortenerCaseStudy locale={locale}/></CaseFrame>;
 }
-

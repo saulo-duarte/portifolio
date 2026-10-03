@@ -1,6 +1,6 @@
-export type NodeSimState = "idle" | "running" | "success" | "error" | "compensated";
+export type NodeSimState = "idle" | "running" | "success" | "error" | "compensated" | "reserved" | "blocked";
 
-export type ScenarioId = "success" | "antifraud_block" | "gateway_declined" | "timeout" | "circuit_breaker";
+export type ScenarioId = "success" | "antifraud_block" | "gateway_declined" | "timeout" | "circuit_breaker" | "reconciled" | "capture_retry" | "not_processed";
 
 export interface SimulationScenario {
   id: ScenarioId;
@@ -24,11 +24,11 @@ export const simulationScenarios: readonly SimulationScenario[] = [
   {
     id: "antifraud_block",
     num: "02",
-    label: { pt: "Falha no Antifraude", en: "Antifraud Failure" },
+    label: { pt: "Recusa no antifraude", en: "Antifraud rejection" },
     tag: { pt: "Compensação Saga", en: "Saga Compensation" },
     desc: {
-      pt: "Score de risco elevado detectado: a PaymentSaga dispara releaseHold e cancela a reserva sem travar saldos.",
-      en: "High fraud risk score: PaymentSaga executes releaseHold and safely aborts without locking user balance."
+      pt: "O antifraude rejeita a tentativa: a Saga marca failed e libera o hold na mesma transação. Um erro temporário de consulta pode gerar retry, em vez de recusa.",
+      en: "Antifraud rejects the attempt: the Saga marks it failed and releases the hold in one transaction. A temporary lookup error can schedule a retry instead of rejection."
     }
   },
   {
@@ -54,11 +54,41 @@ export const simulationScenarios: readonly SimulationScenario[] = [
   {
     id: "circuit_breaker",
     num: "05",
-    label: { pt: "Circuito aberto → standby", en: "Open circuit → standby" },
+    label: { pt: "Circuito aberto → secondary", en: "Open circuit → secondary" },
     tag: { pt: "Failover seguro", en: "Safe failover" },
     desc: {
-      pt: "O circuito aberto impede o envio ao primário; a tentativa persistida pode seguir para o standby porque a cobrança ainda não foi submetida.",
-      en: "An open circuit prevents submission to the primary; the persisted attempt can proceed to standby because the payment was never submitted."
+      pt: "O breaker do primary já está aberto e devolve ErrGatewayNotSubmitted. A Saga persiste a troca para secondary, que possui seu próprio breaker.",
+      en: "The primary breaker is already open and returns ErrGatewayNotSubmitted. The Saga persists the switch to secondary, which has its own breaker."
+    }
+  },
+  {
+    id: "reconciled",
+    num: "06",
+    label: { pt: "Timeout → sucesso reconciliado", en: "Timeout → reconciled success" },
+    tag: { pt: "Lookup no mesmo provedor", en: "Same-provider lookup" },
+    desc: {
+      pt: "O primary aceita a cobrança, mas a resposta se perde. LookupPayment confirma succeeded com a mesma chave; a Saga captura o hold sem enviar ao secondary.",
+      en: "Primary accepts the charge but the response is lost. LookupPayment confirms succeeded with the same key; the Saga captures the hold without submitting to secondary."
+    }
+  },
+  {
+    id: "capture_retry",
+    num: "07",
+    label: { pt: "Falha local → retry da captura", en: "Local failure → capture retry" },
+    tag: { pt: "Gateway já confirmado", en: "Gateway already confirmed" },
+    desc: {
+      pt: "Após o sucesso externo, a captura falha localmente. A Saga mantém o hold e retoma apenas capture; não chama o gateway novamente nem torna o saldo disponível.",
+      en: "After external success, capture fails locally. The Saga keeps the hold and resumes only capture; it does not call the gateway again or make the funds available."
+    }
+  },
+  {
+    id: "not_processed",
+    num: "08",
+    label: { pt: "Lookup not_processed → secondary", en: "Lookup not_processed → secondary" },
+    tag: { pt: "Failover confirmado", en: "Confirmed failover" },
+    desc: {
+      pt: "Após resultado incerto, o primary confirma not_processed. Só então a Saga persiste secondary como próximo provedor e envia uma nova tentativa com a chave desse provedor.",
+      en: "After an uncertain outcome, primary confirms not_processed. Only then does the Saga persist secondary as the next provider and submit with that provider's key."
     }
   }
 ] as const;
